@@ -3,25 +3,6 @@ const weatherApi = "https://api.weather.gov/alerts/active?area="
 
 // Your code here!
 
-function fetchWeatherAlerts(state) {
-  fetch(`https://api.weather.gov/alerts/active?area=${state}`)
-    .then(response => {
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
-      return response.json();
-    })
-    .then(data => {
-      console.log("Weather alerts:", data);
-    })
-    .catch(error => {
-      console.log("Failed to fetch weather alerts:", error.message);
-    });
-}
-
-// Test the function with a US state abbreviation
-fetchWeatherAlerts("CA");
-
 
 const stateInput = document.getElementById("state-input");
 const fetchButton = document.getElementById("fetch-alerts");
@@ -35,15 +16,13 @@ function displayAlerts(data) {
   summary.textContent = `${data.title}: ${data.features.length}`;
   alertsDisplay.appendChild(summary);
 
-
   const alertList = document.createElement("ul");
 
   data.features.forEach(alert => {
-    const listItem = document.createElement("li");
-    listItem.textContent =
+    const item = document.createElement("li");
+    item.textContent =
       alert.properties.headline || "No headline available";
-
-    alertList.appendChild(listItem);
+    alertList.appendChild(item);
   });
 
   alertsDisplay.appendChild(alertList);
@@ -61,24 +40,21 @@ function fetchWeatherAlerts(state) {
 
   if (!state) {
     showError("Please enter a state abbreviation.");
-    return;
-  }
-
-  if (!/^[A-Z]{2}$/.test(state)) {
-    showError("Please enter a valid two-letter state abbreviation.");
+    stateInput.value = "";
     return;
   }
 
   fetch(`https://api.weather.gov/alerts/active?area=${state}`)
     .then(response => {
       if (!response.ok) {
-        throw new Error(`Request failed with status ${response.status}`);
+        throw new Error(`Request failed: ${response.status}`);
       }
-
       return response.json();
     })
     .then(data => {
       displayAlerts(data);
+      errorMessage.textContent = "";
+      errorMessage.classList.add("hidden");
     })
     .catch(error => {
       showError(error.message);
